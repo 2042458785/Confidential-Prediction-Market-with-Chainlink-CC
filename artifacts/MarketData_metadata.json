@@ -1,0 +1,159 @@
+{
+	"compiler": {
+		"version": "0.8.34+commit.80d5c536"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [],
+				"name": "OrderMarketid",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "functionsRouter",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "functionsSubscriptionid",
+				"outputs": [
+					{
+						"internalType": "uint64",
+						"name": "",
+						"type": "uint64"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "market_id",
+						"type": "uint256"
+					}
+				],
+				"name": "markets",
+				"outputs": [
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "description",
+						"type": "string"
+					},
+					{
+						"internalType": "enum MarketData.MarketStatus",
+						"name": "state",
+						"type": "uint8"
+					},
+					{
+						"internalType": "uint48",
+						"name": "createTimeStamp",
+						"type": "uint48"
+					},
+					{
+						"internalType": "uint48",
+						"name": "closeTime",
+						"type": "uint48"
+					},
+					{
+						"internalType": "uint48",
+						"name": "resolveWindow",
+						"type": "uint48"
+					},
+					{
+						"internalType": "uint48",
+						"name": "resolveTimeStamp",
+						"type": "uint48"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "functionsRequest_id",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "string",
+						"name": "functionsSource",
+						"type": "string"
+					},
+					{
+						"internalType": "bytes",
+						"name": "encryptedSecrets",
+						"type": "bytes"
+					},
+					{
+						"internalType": "uint8",
+						"name": "outcome",
+						"type": "uint8"
+					},
+					{
+						"internalType": "bool",
+						"name": "resolved",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"Prediction-Market/MarketData.sol": "MarketData"
+		},
+		"evmVersion": "osaka",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"Prediction-Market/MarketData.sol": {
+			"keccak256": "0xa7f9a622b871f004ee689911180e5377cff0169ca18ea5a585e807b72a498c6c",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://37ce4ae3eedd0cce5a432540115edc5a46f6bfca2202a7052f0169834dbc3394",
+				"dweb:/ipfs/QmVveC9w9n4HCtuGb1gviYn85sVM86FGYSqvvoJA5U8Qaw"
+			]
+		}
+	},
+	"version": 1
+}
