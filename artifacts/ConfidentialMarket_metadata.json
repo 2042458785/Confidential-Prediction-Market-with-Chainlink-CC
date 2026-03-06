@@ -6,9 +6,71 @@
 	"output": {
 		"abi": [
 			{
-				"inputs": [],
+				"inputs": [
+					{
+						"internalType": "address",
+						"name": "_functionsRouter",
+						"type": "address"
+					},
+					{
+						"internalType": "uint64",
+						"name": "_subscription_id",
+						"type": "uint64"
+					}
+				],
 				"stateMutability": "nonpayable",
 				"type": "constructor"
+			},
+			{
+				"inputs": [],
+				"name": "EmptyArgs",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "EmptySecrets",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "EmptySource",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "NoInlineSecrets",
+				"type": "error"
+			},
+			{
+				"inputs": [],
+				"name": "OnlyRouterCanFulfill",
+				"type": "error"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "id",
+						"type": "bytes32"
+					}
+				],
+				"name": "RequestFulfilled",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "id",
+						"type": "bytes32"
+					}
+				],
+				"name": "RequestSent",
+				"type": "event"
 			},
 			{
 				"inputs": [],
@@ -21,6 +83,24 @@
 					}
 				],
 				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "_marketId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_betIndex",
+						"type": "uint256"
+					}
+				],
+				"name": "claimWinnings",
+				"outputs": [],
+				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
@@ -76,26 +156,42 @@
 				"type": "function"
 			},
 			{
-				"inputs": [],
-				"name": "functionsRouter",
-				"outputs": [
+				"inputs": [
 					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
+						"internalType": "bytes32",
+						"name": "requestId",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "bytes",
+						"name": "response",
+						"type": "bytes"
+					},
+					{
+						"internalType": "bytes",
+						"name": "err",
+						"type": "bytes"
 					}
 				],
-				"stateMutability": "view",
+				"name": "handleOracleFulfillment",
+				"outputs": [],
+				"stateMutability": "nonpayable",
 				"type": "function"
 			},
 			{
-				"inputs": [],
-				"name": "functionsSubscriptionid",
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
+					}
+				],
+				"name": "marketTotalPools",
 				"outputs": [
 					{
-						"internalType": "uint64",
-						"name": "",
-						"type": "uint64"
+						"internalType": "uint256",
+						"name": "totalPool",
+						"type": "uint256"
 					}
 				],
 				"stateMutability": "view",
@@ -191,6 +287,71 @@
 			{
 				"inputs": [
 					{
+						"internalType": "uint256",
+						"name": "_market_id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bytes",
+						"name": "_encryptedBet",
+						"type": "bytes"
+					}
+				],
+				"name": "placeBet",
+				"outputs": [],
+				"stateMutability": "payable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "market_id",
+						"type": "uint256"
+					}
+				],
+				"name": "resolveMarket",
+				"outputs": [
+					{
+						"internalType": "bytes32",
+						"name": "request_id",
+						"type": "bytes32"
+					}
+				],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "market_id",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "_betIndices",
+						"type": "uint256[]"
+					},
+					{
+						"internalType": "uint8[]",
+						"name": "_options",
+						"type": "uint8[]"
+					},
+					{
+						"internalType": "uint256[]",
+						"name": "_amounts",
+						"type": "uint256[]"
+					}
+				],
+				"name": "revealBets",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
 						"internalType": "address",
 						"name": "_admin",
 						"type": "address"
@@ -204,12 +365,25 @@
 		],
 		"devdoc": {
 			"kind": "dev",
-			"methods": {},
+			"methods": {
+				"handleOracleFulfillment(bytes32,bytes,bytes)": {
+					"details": "Either response or error parameter will be set, but never both.",
+					"params": {
+						"err": "Aggregated error either from the request's source code or from the execution pipeline.",
+						"requestId": "The requestId returned by FunctionsClient.sendRequest().",
+						"response": "Aggregated response from the request's source code."
+					}
+				}
+			},
 			"version": 1
 		},
 		"userdoc": {
 			"kind": "user",
-			"methods": {},
+			"methods": {
+				"handleOracleFulfillment(bytes32,bytes,bytes)": {
+					"notice": "Chainlink Functions response handler called by the Functions Router during fullilment from the designated transmitter node in an OCR round."
+				}
+			},
 			"version": 1
 		}
 	},
@@ -229,20 +403,156 @@
 		"remappings": []
 	},
 	"sources": {
-		"Prediction-Market/Market.sol": {
-			"keccak256": "0xc1dd4ec2b83d08881c279e45963ac99d0848b27df2cf7185a1b4dacc41efbc21",
+		"@chainlink/contracts/src/v0.8/functions/v1_0_0/FunctionsClient.sol": {
+			"keccak256": "0xa2ba29211e017619070bc6ea22a2b6edfe6826423e789d225d1da5500f775ce1",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://88f81f374e47bddc6ee3d01d78e062c136741f296c7ba99f59e702d58a5c27b4",
-				"dweb:/ipfs/QmXiHe1Nt8rbG5z3xi2g3aiznRYFdk3BsLKiwS3eWK59c8"
+				"bzz-raw://0c33aba5ec5d8e723e329330c0bec7d357ee09a63fabba089002507524d86ec4",
+				"dweb:/ipfs/QmbU52cedj1HeNTDoB8TYFteJqD2MuqDr7uykxU99ii3v2"
+			]
+		},
+		"@chainlink/contracts/src/v0.8/functions/v1_0_0/interfaces/IFunctionsClient.sol": {
+			"keccak256": "0x6117b82e7c4eec44ce557b0fc8bc1ac5f49e5d160ac6d4485452d6aafdd762ff",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://0e0828ef423afef9f6f709bb173a7e3991fe555bf9337a4941d65da525ac4ad3",
+				"dweb:/ipfs/QmXz1jHRZFTqdnNxP2tffVQ9NnUE1xgtBMRWuyUrTVY4pm"
+			]
+		},
+		"@chainlink/contracts/src/v0.8/functions/v1_0_0/interfaces/IFunctionsRouter.sol": {
+			"keccak256": "0x730b11b5047f167f4102fee26826ac491081152614a59a3d624a9f971a926147",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://4844ee8b14d4d61a643abf5faeee3bfcff29bbe1a1ca10c53e4819adabefbe1c",
+				"dweb:/ipfs/QmSkexNpR7inp9Uk25TXr7d7xogaFMTQVhdze6FVy5UHh4"
+			]
+		},
+		"@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol": {
+			"keccak256": "0x3058b1c78c6c950e67d7731974de3e11e0d1f850522a0c125dff4955a35ed592",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://41dd4d86e23b812e277aca291a57967d3a6e466f1aab5b531a88c0f8bdf7cd2e",
+				"dweb:/ipfs/QmPGpwLTocwG2Juct6muRs2r56cF1VZxsNSkyVcBWDJBwf"
+			]
+		},
+		"@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsResponse.sol": {
+			"keccak256": "0xfdc7495dddbabd725370e4030b602d8ec59889caccdc4bf97874e7487c229c30",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://4d63c3c80718c88cf6431a28afb2156eb68dec633a184049468931945fd95cc7",
+				"dweb:/ipfs/QmdUBsz6329m9pUbBkzqguco4ciR1EDwtbhM4VnbeZSoDE"
+			]
+		},
+		"@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol": {
+			"keccak256": "0xf73016e2473f54ab8d5c7e3c4ab2fa280a185ccfc80d2be48ac5d18016c3f717",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://f051e82857cc14b3a975f8c09eece2ca349d4954e83165a2b56ed659aad40c9e",
+				"dweb:/ipfs/QmRNMQ5jQQ3a9LZgsQqmQxYJxhTQKQrRtP4Wc7TAjYS43N"
+			]
+		},
+		"@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwnerWithProposal.sol": {
+			"keccak256": "0x521cf41e477e502d133e050a5f35625f2ec652327af7f1b21abf5b898f9b8df9",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://65198b68ed110b9900174be8b3ef682da28f7645fbaa21e4ccd97e8b4a971501",
+				"dweb:/ipfs/QmfDu99JhbBFnAFdw95jjnGgXEohyRvA7XPQf4NEpheytc"
+			]
+		},
+		"@chainlink/contracts/src/v0.8/shared/interfaces/IOwnable.sol": {
+			"keccak256": "0x19f12817caa863b6785cf1e9085c66a93042fe906e41926bcb4a12bec9558d60",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://d1cf3f784c42642747c263cfa7b9462846d5ce8ff84467470ec2703a659b925d",
+				"dweb:/ipfs/Qmbz2qYFMNM3CVYNKgwJV5Kqx5FFHSrb8zXEsYbJXyjFnP"
+			]
+		},
+		"@chainlink/contracts/src/v0.8/vendor/@ensdomains/buffer/v0.1.0/Buffer.sol": {
+			"keccak256": "0x0d86b367813922094e02594a406ba89f5e97d3d74ec2ce3c4032566840e302b0",
+			"license": "BSD-2-Clause",
+			"urls": [
+				"bzz-raw://2c65ceaef4ce70e8638275da75f4c384d4e404d588fcac404028da7e634c81a8",
+				"dweb:/ipfs/QmV3vMmjseNombFaRGw7K4PgDj6rrWcEzNY9S5jtLAdJqG"
+			]
+		},
+		"@chainlink/contracts/src/v0.8/vendor/solidity-cborutils/v2.0.0/CBOR.sol": {
+			"keccak256": "0xdecf04203502670ac72ba466c75e4f87f4419907365005f0d73e7d07ee3e5715",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://39c9937cf45f840cf3a45a83dec3719dbd2f1d71198088db48b909ec656f77dd",
+				"dweb:/ipfs/QmQx9mEREaFyJGC2KpqWBqBV712NY8vUBrcqTR4RdVNBiu"
+			]
+		},
+		"@openzeppelin/contracts/security/ReentrancyGuard.sol": {
+			"keccak256": "0xa535a5df777d44e945dd24aa43a11e44b024140fc340ad0dfe42acf4002aade1",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://41319e7f621f2dc3733511332c4fd032f8e32ad2aa7fd6f665c19741d9941a34",
+				"dweb:/ipfs/QmcYR3bd862GD1Bc7jwrU9bGxrhUu5na1oP964bDCu2id1"
+			]
+		},
+		"@openzeppelin/contracts/utils/Bytes.sol": {
+			"keccak256": "0xf80e4b96b6849936ea0fabd76cf81b13d7276295fddb1e1c07afb3ddf650b0ac",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://6430007255ac11c6e9c4331a418f3af52ff66fbbae959f645301d025b20aeb08",
+				"dweb:/ipfs/QmQE5fjmBBRw9ndnzJuC2uskYss1gbaR7JdazoCf1FGoBj"
+			]
+		},
+		"@openzeppelin/contracts/utils/Panic.sol": {
+			"keccak256": "0xf7fe324703a64fc51702311dc51562d5cb1497734f074e4f483bfb6717572d7a",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://c6a5ff4f9fd8649b7ee20800b7fa387d3465bd77cf20c2d1068cd5c98e1ed57a",
+				"dweb:/ipfs/QmVSaVJf9FXFhdYEYeCEfjMVHrxDh5qL4CGkxdMWpQCrqG"
+			]
+		},
+		"@openzeppelin/contracts/utils/Strings.sol": {
+			"keccak256": "0x1fdc2de9585ab0f1c417f02a873a2b6343cd64bb7ffec6b00ffa11a4a158d9e8",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://1ab223a3d969c6cd7610049431dd42740960c477e45878f5d8b54411f7a32bdc",
+				"dweb:/ipfs/QmWumhjvhpKcwx3vDPQninsNVTc3BGvqaihkQakFkQYpaS"
+			]
+		},
+		"@openzeppelin/contracts/utils/math/Math.sol": {
+			"keccak256": "0x59973a93b1f983f94e10529f46ca46544a9fec2b5f56fb1390bbe9e0dc79f857",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://c55ef8f0b9719790c2ae6f81d80a59ffb89f2f0abe6bc065585bd79edce058c5",
+				"dweb:/ipfs/QmNNmCbX9NjPXKqHJN8R1WC2rNeZSQrPZLd6FF6AKLyH5Y"
+			]
+		},
+		"@openzeppelin/contracts/utils/math/SafeCast.sol": {
+			"keccak256": "0xc8cae21c9ae4a46e5162ff9bf5b351d6fa6a6eba72d515f3bc1bdfeda7fdf083",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://ce830ebcf28e31643caba318996db3763c36d52cd0f23798ba83c135355d45e9",
+				"dweb:/ipfs/QmdGPcvptHN7UBCbUYBbRX3hiRVRFLRwno8b4uga6uFNif"
+			]
+		},
+		"@openzeppelin/contracts/utils/math/SignedMath.sol": {
+			"keccak256": "0xb1970fac7b64e6c09611e6691791e848d5e3fe410fa5899e7df2e0afd77a99e3",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://db5fbb3dddd8b7047465b62575d96231ba8a2774d37fb4737fbf23340fabbb03",
+				"dweb:/ipfs/QmVUSvooZKEdEdap619tcJjTLcAuH6QBdZqAzWwnAXZAWJ"
+			]
+		},
+		"Prediction-Market/Market.sol": {
+			"keccak256": "0x8c267e42593373406bac4e4111161a92b062919c702975a7698de9631ad1694b",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://c59bd01870282f2369028a255b37d5587ad883780f8363674de4b737574bafba",
+				"dweb:/ipfs/QmXkwhySHXm15utLSCjgZtZRpir6CXG3841XW7epvU2sS5"
 			]
 		},
 		"Prediction-Market/MarketData.sol": {
-			"keccak256": "0xe9573b83800e1a0a59ed671248e576bcdd745732e1e70250e0ae954987ff13ee",
+			"keccak256": "0x8650b9a6f1d8078c6315da57ea9920080873908fc2670bfd483f355b3bd57bc2",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://0a1f1c146fea040ac1c851827710222ad1a6a1ec54580456ae5bf6d40ccac3ee",
-				"dweb:/ipfs/QmfXhj79MeNQFWSkT8TKPRfm3Vzh78aXR2H3dpNzdYQnYs"
+				"bzz-raw://4b2efe86ff0d8eef714da7307f91e3eee7f7eff700bb6daad7507c01b71bca2b",
+				"dweb:/ipfs/QmTPJb2n6sAW21Efcb1vvuKVAC6ptZuNEprKssjA6CgCbZ"
 			]
 		}
 	},

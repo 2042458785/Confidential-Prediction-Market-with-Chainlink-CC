@@ -19,26 +19,19 @@
 				"type": "function"
 			},
 			{
-				"inputs": [],
-				"name": "functionsRouter",
-				"outputs": [
+				"inputs": [
 					{
-						"internalType": "address",
-						"name": "",
-						"type": "address"
+						"internalType": "uint256",
+						"name": "id",
+						"type": "uint256"
 					}
 				],
-				"stateMutability": "view",
-				"type": "function"
-			},
-			{
-				"inputs": [],
-				"name": "functionsSubscriptionid",
+				"name": "marketTotalPools",
 				"outputs": [
 					{
-						"internalType": "uint64",
-						"name": "",
-						"type": "uint64"
+						"internalType": "uint256",
+						"name": "totalPool",
+						"type": "uint256"
 					}
 				],
 				"stateMutability": "view",
@@ -147,11 +140,11 @@
 	},
 	"sources": {
 		"Prediction-Market/MarketData.sol": {
-			"keccak256": "0xa7f9a622b871f004ee689911180e5377cff0169ca18ea5a585e807b72a498c6c",
+			"keccak256": "0x8650b9a6f1d8078c6315da57ea9920080873908fc2670bfd483f355b3bd57bc2",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://37ce4ae3eedd0cce5a432540115edc5a46f6bfca2202a7052f0169834dbc3394",
-				"dweb:/ipfs/QmVveC9w9n4HCtuGb1gviYn85sVM86FGYSqvvoJA5U8Qaw"
+				"bzz-raw://4b2efe86ff0d8eef714da7307f91e3eee7f7eff700bb6daad7507c01b71bca2b",
+				"dweb:/ipfs/QmTPJb2n6sAW21Efcb1vvuKVAC6ptZuNEprKssjA6CgCbZ"
 			]
 		}
 	},

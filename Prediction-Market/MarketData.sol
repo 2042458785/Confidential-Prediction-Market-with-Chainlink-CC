@@ -9,8 +9,8 @@ contract MarketData{
         address user;  //下注用户
         bytes encryptedBet; //加密后的下注数据 amount和option 也就是下注金额和选项
         uint256 amount; //用户下注金额 明文存储 但是需要与加密后的下注数据中的金额一致
-        uint8 option; //用户的选项(解密后才会有) ---结算后才会填充
-        bool claimed; //用户是否已经领取了获胜奖励
+        uint8 option; //用户的选项(解密后才会有) ---结算后才会填充 默认初始为0
+        bool claimed; //用户是否已经领取了获胜奖励 默认为false
     }
 
     struct Market {
@@ -30,9 +30,11 @@ contract MarketData{
         bool resolved; //是否已经成功结算
     }
 
+    mapping (uint256 id => uint256 totalPool) public marketTotalPools; //该市场的所有下注金额 每次下注时累加
+
     mapping (uint256 market_id => Market) public markets; //所有的Market
     uint256 public OrderMarketid; //总Market数量(也作为生成Market的序号)
-    address public functionsRouter; //Chainlink Functions 路由器的地址 每个网络（如 Sepolia）有固定的路由器地址，在构造函数中设置 用于向此地址发送 Functions 请求
-    uint64 public functionsSubscriptionid; //Chainlink Functions 的订阅 ID 订阅需要提前创建并充值 LINK，用于支付 Functions 请求的费用 在构造函数中设置
+    address internal  functionsRouter; //Chainlink Functions 路由器的地址 每个网络（如 Sepolia）有固定的路由器地址，在构造函数中设置 用于向此地址发送 Functions 请求
+    uint64 internal  functionsSubscriptionid; //Chainlink Functions 的订阅 ID 订阅需要提前创建并充值 LINK，用于支付 Functions 请求的费用 在构造函数中设置
 
 }
