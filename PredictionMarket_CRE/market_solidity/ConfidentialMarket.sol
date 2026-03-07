@@ -4,8 +4,10 @@ pragma solidity ^0.8.34;
 import "./MarketData.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 contract ConfidentialMarket is MarketData, ReentrancyGuard, Ownable {
+    using ECDSA for bytes32;
 
     // 管理员映射
     mapping(address => bool) public admins;
@@ -81,7 +83,7 @@ contract ConfidentialMarket is MarketData, ReentrancyGuard, Ownable {
         require(block.timestamp >= market.closeTime, "Betting not closed");
         require(block.timestamp <= market.resolveTimeStamp, "Resolve window expired");
 
-        market.state = MarketStatus.Resolving;  // 可选，标记正在解析
+        market.state = MarketStatus.Resolving;  // 标记正在解析Resolving
         emit SettlementRequested(marketId);
     }
 
@@ -91,9 +93,14 @@ contract ConfidentialMarket is MarketData, ReentrancyGuard, Ownable {
         uint8 outcome,
         bytes memory signature
     ) external {
-        // 验证签名来自可信的 CRE DON（此处简化，仅验证调用者是预先设置的 CRE 地址）
-        // 实际可使用 EIP-712 或简单验证调用者白名单
-        require(msg.sender == trustedCREAddress, "Invalid caller"); // 需预先设置 trustedCREAddress
+        // 构造要签名的消息
+        bytes32 messageHash = keccak256(abi.encodePacked(marketId, outcome));
+        // 手动构造以太坊签名哈希
+        bytes32 ethSignedMessageHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", messageHash));
+
+        //恢复签名者地址
+        address recoveredSigner = ethSignedMessageHash.recover(signature);
+        require(recoveredSigner == trustedSigner, "Invalid signature");
 
         Market storage market = markets[marketId];
         require(market.state == MarketStatus.Resolving, "Not resolving");
@@ -105,10 +112,9 @@ contract ConfidentialMarket is MarketData, ReentrancyGuard, Ownable {
         emit MarketResolved(marketId, outcome);
     }
 
-    // 设置可信的 CRE 地址（由 owner 设置）
-    address public trustedCREAddress;
-    function setTrustedCRE(address _addr) external onlyOwner {
-        trustedCREAddress = _addr;
+
+    function setTrustedSigner(address _signer) external onlyOwner { //设置存储CRE DON 的公钥地址
+        trustedSigner = _signer;
     }
 
     // 管理员批量解密下注数据（或在领取时由用户自行解密并验证，本合约保留此函数）
