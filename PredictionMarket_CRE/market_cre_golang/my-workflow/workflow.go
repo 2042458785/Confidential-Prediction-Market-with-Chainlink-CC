@@ -1,333 +1,233 @@
 package main
 
 import (
-	"encoding/hex"
+	"cre-custom-data-feed-go/contracts/evm/src/generated/confidential_market"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"log/slog"
-	"math/big"
-	"time"
-
-	"cre-custom-data-feed-go/contracts/evm/src/generated/balance_reader"
-	"cre-custom-data-feed-go/contracts/evm/src/generated/ierc20"
-	"cre-custom-data-feed-go/contracts/evm/src/generated/message_emitter"
-	"cre-custom-data-feed-go/contracts/evm/src/generated/reserve_manager"
-
-	"github.com/ethereum/go-ethereum/rpc"
-
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/shopspring/decimal"
-
-	pbvalues "github.com/smartcontractkit/chainlink-protos/cre/go/values"
 	"github.com/smartcontractkit/cre-sdk-go/capabilities/blockchain/evm"
 	"github.com/smartcontractkit/cre-sdk-go/capabilities/blockchain/evm/bindings"
 	"github.com/smartcontractkit/cre-sdk-go/capabilities/networking/http"
-	"github.com/smartcontractkit/cre-sdk-go/capabilities/scheduler/cron"
 	"github.com/smartcontractkit/cre-sdk-go/cre"
+	"log/slog"
+	"math/big"
+	"net/url"
+	"strings"
 )
 
-// EVMConfig holds per-chain configuration.
-type EVMConfig struct {
-	TokenAddress          string `json:"tokenAddress"`
-	ReserveManagerAddress string `json:"reserveManagerAddress"`
-	BalanceReaderAddress  string `json:"balanceReaderAddress"`
-	MessageEmitterAddress string `json:"messageEmitterAddress"`
-	ChainName             string `json:"chainName"`
-	GasLimit              uint64 `json:"gasLimit"`
-}
-
-func (e *EVMConfig) GetChainSelector() (uint64, error) {
-	return evm.ChainSelectorFromName(e.ChainName)
-}
-
-func (e *EVMConfig) NewEVMClient() (*evm.Client, error) {
-	chainSelector, err := e.GetChainSelector()
-	if err != nil {
-		return nil, err
-	}
-	return &evm.Client{
-		ChainSelector: chainSelector,
-	}, nil
-}
-
+// Config 工作流配置
 type Config struct {
-	Schedule string      `json:"schedule"`
-	URL      string      `json:"url"`
-	EVMs     []EVMConfig `json:"evms"`
+	ContractAddress string    `json:"contractAddress"` // 合约地址
+	ChainSelector   uint64    `json:"chainSelector"`   // 链选择器，如 16015286601757825753 (Sepolia)
+	APIConfig       APIConfig `json:"apiConfig"`       // 外部 API 配置
+	GasLimit        uint64    `json:"gasLimit"`        // 交易 gas 限制
 }
 
-type HTTPTriggerPayload struct {
-	ExecutionTime time.Time `json:"executionTime"`
+type APIConfig struct {
+	URL     string            `json:"url"`
+	Method  string            `json:"method"`
+	Headers map[string]string `json:"headers"`
 }
 
-type ReserveInfo struct {
-	LastUpdated  time.Time       `consensus_aggregation:"median" json:"lastUpdated"`
-	TotalReserve decimal.Decimal `consensus_aggregation:"median" json:"totalReserve"`
-}
-
-type PORResponse struct {
-	AccountName string    `json:"accountName"`
-	TotalTrust  float64   `json:"totalTrust"`
-	TotalToken  float64   `json:"totalToken"`
-	Ripcord     bool      `json:"ripcord"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-}
-
+// InitWorkflow 创建并返回工作流
 func InitWorkflow(config *Config, logger *slog.Logger, secretsProvider cre.SecretsProvider) (cre.Workflow[*Config], error) {
-	cronTriggerCfg := &cron.Config{
-		Schedule: config.Schedule,
+	// 创建 EVM 客户端
+	evmClient := &evm.Client{
+		ChainSelector: config.ChainSelector,
 	}
 
-	workflow := cre.Workflow[*Config]{
-		cre.Handler(
-			cron.Trigger(cronTriggerCfg),
-			onPORCronTrigger,
-		),
+	// 创建合约实例
+	contractAddress := common.HexToAddress(config.ContractAddress)
+	contract, err := confidential_market.NewConfidentialMarket(evmClient, contractAddress, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create contract binding: %w", err)
 	}
 
-	for _, evmCfg := range config.EVMs {
-		msgEmitter, err := prepareMessageEmitter(logger, evmCfg)
-		if err != nil {
-			return nil, fmt.Errorf("failed to prepare message emitter: %w", err)
-		}
-		chainSelector, err := evmCfg.GetChainSelector()
-		if err != nil {
-			return nil, fmt.Errorf("failed to get chain selector: %w", err)
-		}
-		trigger, err := msgEmitter.LogTriggerMessageEmittedLog(chainSelector, evm.ConfidenceLevel_CONFIDENCE_LEVEL_LATEST, []message_emitter.MessageEmittedTopics{})
-		if err != nil {
-			return nil, fmt.Errorf("failed to create message emitted trigger: %w", err)
-		}
-		workflow = append(workflow, cre.Handler(trigger, onLogTrigger))
+	// 创建事件触发器，监听 SettlementRequested 事件
+	// 我们不过滤特定市场，监听所有
+	trigger, err := contract.LogTriggerSettlementRequestedLog(
+		config.ChainSelector,
+		evm.ConfidenceLevel_CONFIDENCE_LEVEL_LATEST,
+		nil, // 无特定 topics 过滤
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create log trigger: %w", err)
 	}
 
-	return workflow, nil
+	// 使用闭包将 contract 传入处理器
+	handler := cre.Handler(trigger, func(config *Config, runtime cre.Runtime, payload *bindings.DecodedLog[confidential_market.SettlementRequestedDecoded]) (string, error) {
+		return onSettlementRequested(config, runtime, payload, contract)
+	})
+
+	return cre.Workflow[*Config]{handler}, nil
 }
 
-func onPORCronTrigger(config *Config, runtime cre.Runtime, outputs *cron.Payload) (string, error) {
-	return doPOR(config, runtime)
+// 用于解析 Geocoding API 响应的临时结构
+type geoResult struct {
+	Lat float64 `json:"latitude" consensus_aggregation:"median"`
+	Lon float64 `json:"longitude" consensus_aggregation:"median"`
 }
 
-func onLogTrigger(config *Config, runtime cre.Runtime, payload *bindings.DecodedLog[message_emitter.MessageEmittedDecoded]) (string, error) {
+type outcomeWrapper struct {
+	Value uint8 `consensus_aggregation:"median"`
+}
+
+// onSettlementRequested 是事件触发后的处理函数
+func onSettlementRequested(
+	config *Config,
+	runtime cre.Runtime,
+	payload *bindings.DecodedLog[confidential_market.SettlementRequestedDecoded],
+	contract *confidential_market.ConfidentialMarket, // 传入合约绑定
+) (string, error) {
 	logger := runtime.Logger()
 
-	// use the decoded event log to get the event message
-	message := payload.Data.Message
-	logger.Info("Message retrieved from the event log", "message", message)
+	// 1. 从事件中提取 marketId (*big.Int)
+	marketId := payload.Data.MarketId
+	logger.Info("Received SettlementRequested", "marketId", marketId)
 
-	// the event message can also be retrieved from the contract itself
-	// below is an example of how to read from the contract
-	messageEmitter, err := prepareMessageEmitter(logger, config.EVMs[0])
+	fmt.Println("对应的市场id", marketId)
+
+	// 2. 从链上读取市场描述
+	args := confidential_market.MarketsInput{
+		Arg0: marketId,
+	}
+	fmt.Println("对应的市场id", marketId)
+
+	// 指定区块号为 finalized (-3)
+	blockNumber := big.NewInt(-3)
+	marketsPromise := contract.Markets(runtime, args, blockNumber)
+
+	marketsOutput, err := marketsPromise.Await()
 	if err != nil {
-		return "", fmt.Errorf("failed to prepare message emitter: %w", err)
+		return "", fmt.Errorf("failed to get market data from chain: %w", err)
 	}
 
-	// use the decoded event log to get the emitter address
-	// the emitter address is not a dynamic type, so it can be decoded from log even though its indexed
-	emitter := payload.Data.Emitter
-	lastMessageInput := message_emitter.GetLastMessageInput{
-		Emitter: common.Address(emitter),
+	fmt.Println("对应的市场id", marketId)
+	description := marketsOutput.Description
+	logger.Info("Market description from chain", "description", description)
+
+	//description := "2025-03-08:London" // 硬编码，便于模拟
+	logger.Info("Market description", "description", description)
+
+	// 3. 从 description 中提取城市名（假设格式为 "date:city"）
+	parts := strings.Split(description, ":")
+	if len(parts) < 2 {
+		return "", fmt.Errorf("invalid description format: %s", description)
 	}
+	cityName := parts[1] // 取冒号后的城市名
+	logger.Info("Using city name", "city", cityName)
 
-	blockNumber := pbvalues.ProtoToBigInt(payload.Log.BlockNumber)
-	logger.Info("Block number of event log", "blockNumber", blockNumber)
-	message, err = messageEmitter.GetLastMessage(runtime, lastMessageInput, blockNumber).Await()
-	if err != nil {
-		logger.Error("Could not read from contract", "contract_chain", config.EVMs[0].ChainName, "err", err.Error())
-		return "", err
-	}
-	logger.Info("Message retrieved from the contract", "message", message)
+	// 4. 调用 Geocoding API 获取经纬度
+	geocodingURL := fmt.Sprintf("https://geocoding-api.open-meteo.com/v1/search?name=%s&count=1", url.QueryEscape(cityName))
+	logger.Info("Calling Geocoding API", "url", geocodingURL)
 
-	return message, nil
-}
-
-func doPOR(config *Config, runtime cre.Runtime) (string, error) {
-	logger := runtime.Logger()
-	// Fetch PoR
-	logger.Info("fetching por", "url", config.URL, "evms", config.EVMs)
 	client := &http.Client{}
-	reserveInfo, err := http.SendRequest(config, runtime, client, fetchPOR, cre.ConsensusAggregationFromTags[*ReserveInfo]()).Await()
-	if err != nil {
-		logger.Error("error fetching por", "err", err)
-		return "", err
-	}
-
-	logger.Info("ReserveInfo", "reserveInfo", reserveInfo)
-
-	totalSupply, err := getTotalSupply(config, runtime)
-	if err != nil {
-		return "", err
-	}
-
-	logger.Info("TotalSupply", "totalSupply", totalSupply)
-	totalReserveScaled := reserveInfo.TotalReserve.Mul(decimal.NewFromUint64(1e18)).BigInt()
-	logger.Info("TotalReserveScaled", "totalReserveScaled", totalReserveScaled)
-
-	nativeTokenBalance, err := fetchNativeTokenBalance(runtime, config.EVMs[0], config.EVMs[0].TokenAddress)
-	if err != nil {
-		return "", fmt.Errorf("failed to fetch native token balance: %w", err)
-	}
-	logger.Info("Native token balance", "token", config.EVMs[0].TokenAddress, "balance", nativeTokenBalance)
-
-	// Update reserves
-	if err := updateReserves(config, runtime, totalSupply, totalReserveScaled); err != nil {
-		return "", fmt.Errorf("failed to update reserves: %w", err)
-	}
-
-	return reserveInfo.TotalReserve.String(), nil
-}
-
-func prepareMessageEmitter(logger *slog.Logger, evmCfg EVMConfig) (*message_emitter.MessageEmitter, error) {
-	evmClient, err := evmCfg.NewEVMClient()
-	if err != nil {
-		return nil, fmt.Errorf("failed to create EVM client for %s: %w", evmCfg.ChainName, err)
-	}
-
-	address := common.HexToAddress(evmCfg.MessageEmitterAddress)
-
-	messageEmitter, err := message_emitter.NewMessageEmitter(evmClient, address, nil)
-	if err != nil {
-		logger.Error("failed to create message emitter", "address", evmCfg.MessageEmitterAddress, "err", err)
-		return nil, fmt.Errorf("failed to create message emitter for address %s: %w", evmCfg.MessageEmitterAddress, err)
-	}
-
-	return messageEmitter, nil
-}
-
-func fetchNativeTokenBalance(runtime cre.Runtime, evmCfg EVMConfig, tokenHolderAddress string) (*big.Int, error) {
-	logger := runtime.Logger()
-	evmClient, err := evmCfg.NewEVMClient()
-	if err != nil {
-		return nil, fmt.Errorf("failed to create EVM client for %s: %w", evmCfg.ChainName, err)
-	}
-
-	balanceReaderAddress := common.HexToAddress(evmCfg.BalanceReaderAddress)
-	balanceReader, err := balance_reader.NewBalanceReader(evmClient, balanceReaderAddress, nil)
-	if err != nil {
-		logger.Error("failed to create balance reader", "address", evmCfg.BalanceReaderAddress, "err", err)
-		return nil, fmt.Errorf("failed to create balance reader for address %s: %w", evmCfg.BalanceReaderAddress, err)
-	}
-	tokenAddress, err := hexToBytes(tokenHolderAddress)
-	if err != nil {
-		logger.Error("failed to decode token address", "address", tokenHolderAddress, "err", err)
-		return nil, fmt.Errorf("failed to decode token address %s: %w", tokenHolderAddress, err)
-	}
-
-	logger.Info("Getting native balances", "address", evmCfg.BalanceReaderAddress, "tokenAddress", tokenHolderAddress)
-	balances, err := balanceReader.GetNativeBalances(runtime, balance_reader.GetNativeBalancesInput{
-		Addresses: []common.Address{common.Address(tokenAddress)},
-	}, big.NewInt(rpc.FinalizedBlockNumber.Int64())).Await()
-
-	if err != nil {
-		logger.Error("Could not read from contract", "contract_chain", evmCfg.ChainName, "err", err.Error())
-		return nil, err
-	}
-
-	if len(balances) < 1 {
-		logger.Error("No balances returned from contract", "contract_chain", evmCfg.ChainName)
-		return nil, fmt.Errorf("no balances returned from contract for chain %s", evmCfg.ChainName)
-	}
-
-	return balances[0], nil
-}
-
-func getTotalSupply(config *Config, runtime cre.Runtime) (*big.Int, error) {
-	evms := config.EVMs
-	logger := runtime.Logger()
-	// Fetch supply from all EVMs in parallel
-	supplyPromises := make([]cre.Promise[*big.Int], len(evms))
-	for i, evmCfg := range evms {
-		evmClient, err := evmCfg.NewEVMClient()
+	geoResp, err := http.SendRequest(config, runtime, client, func(config *Config, logger *slog.Logger, sendRequester *http.SendRequester) (geoResult, error) {
+		req := &http.Request{
+			Method: "GET",
+			Url:    geocodingURL,
+		}
+		resp, err := sendRequester.SendRequest(req).Await()
 		if err != nil {
-			logger.Error("failed to create EVM client", "chainName", evmCfg.ChainName, "err", err)
-			return nil, fmt.Errorf("failed to create EVM client for %s: %w", evmCfg.ChainName, err)
+			return geoResult{}, err
+		}
+		if len(resp.Body) == 0 {
+			return geoResult{}, fmt.Errorf("empty response body")
 		}
 
-		address := common.HexToAddress(evmCfg.TokenAddress)
-		token, err := ierc20.NewIERC20(evmClient, address, nil)
-		if err != nil {
-			logger.Error("failed to create token", "address", evmCfg.TokenAddress, "err", err)
-			return nil, fmt.Errorf("failed to create token for address %s: %w", evmCfg.TokenAddress, err)
+		var geoData struct {
+			Results []struct {
+				Latitude  float64 `json:"latitude"`
+				Longitude float64 `json:"longitude"`
+			} `json:"results"`
 		}
-		evmTotalSupplyPromise := token.TotalSupply(runtime, big.NewInt(rpc.FinalizedBlockNumber.Int64()))
-		supplyPromises[i] = evmTotalSupplyPromise
+		if err := json.Unmarshal(resp.Body, &geoData); err != nil {
+			return geoResult{}, fmt.Errorf("failed to parse geocoding response: %w", err)
+		}
+		if len(geoData.Results) == 0 {
+			return geoResult{}, fmt.Errorf("city not found: %s", cityName)
+		}
+		return geoResult{
+			Lat: geoData.Results[0].Latitude,
+			Lon: geoData.Results[0].Longitude,
+		}, nil
+	}, cre.ConsensusAggregationFromTags[geoResult]()).Await()
+	if err != nil {
+		return "", fmt.Errorf("geocoding failed: %w", err)
 	}
+	logger.Info("Geocoding result", "lat", geoResp.Lat, "lon", geoResp.Lon)
 
-	// We can add cre.AwaitAll that takes []cre.Promise[T] and returns ([]T, error)
-	totalSupply := big.NewInt(0)
-	for i, promise := range supplyPromises {
-		supply, err := promise.Await()
+	// 5. 调用 Weather API 获取当前天气（使用配置中的 URL）
+	weatherURL := fmt.Sprintf("%s?latitude=%f&longitude=%f&current_weather=true",
+		config.APIConfig.URL, geoResp.Lat, geoResp.Lon)
+	logger.Info("Calling Weather API", "url", weatherURL)
+
+	outcomeWrapperVal, err := http.SendRequest(config, runtime, client, func(config *Config, logger *slog.Logger, sendRequester *http.SendRequester) (outcomeWrapper, error) {
+		req := &http.Request{
+			Method:  config.APIConfig.Method,
+			Url:     weatherURL,
+			Headers: config.APIConfig.Headers,
+		}
+		resp, err := sendRequester.SendRequest(req).Await()
 		if err != nil {
-			chainName := evms[i].ChainName
-			logger.Error("Could not read from contract", "contract_chain", chainName, "err", err.Error())
-			return nil, err
+			return outcomeWrapper{}, err
+		}
+		if len(resp.Body) == 0 {
+			return outcomeWrapper{}, fmt.Errorf("empty response body")
 		}
 
-		totalSupply = totalSupply.Add(totalSupply, supply)
-	}
+		var weatherData struct {
+			CurrentWeather struct {
+				Temperature float64 `json:"temperature"`
+			} `json:"current_weather"`
+		}
+		if err := json.Unmarshal(resp.Body, &weatherData); err != nil {
+			return outcomeWrapper{}, fmt.Errorf("failed to parse weather response: %w", err)
+		}
 
-	return totalSupply, nil
-}
-
-func updateReserves(config *Config, runtime cre.Runtime, totalSupply *big.Int, totalReserveScaled *big.Int) error {
-	evmCfg := config.EVMs[0]
-	logger := runtime.Logger()
-	logger.Info("Updating reserves", "totalSupply", totalSupply, "totalReserveScaled", totalReserveScaled)
-
-	evmClient, err := evmCfg.NewEVMClient()
+		// 根据温度决定 outcome（示例：温度 > 15℃ 为 1，否则为 0）
+		if weatherData.CurrentWeather.Temperature > 5 {
+			return outcomeWrapper{Value: 1}, nil
+		}
+		return outcomeWrapper{Value: 0}, nil
+	}, cre.ConsensusAggregationFromTags[outcomeWrapper]()).Await()
 	if err != nil {
-		return fmt.Errorf("failed to create EVM client for %s: %w", evmCfg.ChainName, err)
+		return "", fmt.Errorf("weather API failed: %w", err)
 	}
+	outcome := outcomeWrapperVal.Value
+	logger.Info("Weather result", "outcome", outcome)
 
-	reserveManager, err := reserve_manager.NewReserveManager(evmClient, common.HexToAddress(evmCfg.ReserveManagerAddress), nil)
+	// 6. 编码 submitResult 的 calldata（合约需要 signature 参数，但逻辑已忽略，传空切片）
+	codec, err := confidential_market.NewCodec()
 	if err != nil {
-		return fmt.Errorf("failed to create reserve manager: %w", err)
+		return "", fmt.Errorf("failed to create codec: %w", err)
 	}
-
-	logger.Info("Writing report", "totalSupply", totalSupply, "totalReserveScaled", totalReserveScaled)
-	resp, err := reserveManager.WriteReportFromUpdateReserves(runtime, reserve_manager.UpdateReserves{
-		TotalMinted:  totalSupply,
-		TotalReserve: totalReserveScaled,
-	}, nil).Await()
-
+	calldata, err := codec.EncodeSubmitResultMethodCall(confidential_market.SubmitResultInput{
+		MarketId:  marketId,
+		Outcome:   outcome,
+		Signature: []byte{}, // 合约不验证签名，传空即可
+	})
 	if err != nil {
-		logger.Error("WriteReport await failed", "error", err, "errorType", fmt.Sprintf("%T", err))
-		return fmt.Errorf("failed to write report: %w", err)
-	}
-	logger.Info("Write report succeeded", "response", resp)
-	logger.Info("Write report transaction succeeded at", "txHash", common.BytesToHash(resp.TxHash).Hex())
-	return nil
-}
-
-func fetchPOR(config *Config, logger *slog.Logger, sendRequester *http.SendRequester) (*ReserveInfo, error) {
-	httpActionOut, err := sendRequester.SendRequest(&http.Request{
-		Method: "GET",
-		Url:    config.URL,
-	}).Await()
-	if err != nil {
-		return nil, err
+		return "", fmt.Errorf("failed to encode calldata: %w", err)
 	}
 
-	porResp := &PORResponse{}
-	if err = json.Unmarshal(httpActionOut.Body, porResp); err != nil {
-		return nil, err
-	}
+	logger.Info("calldata", calldata)
+	logger.Info("Successful to Transaction")
 
-	if porResp.Ripcord {
-		return nil, errors.New("ripcord is true")
-	}
-
-	res := &ReserveInfo{
-		LastUpdated:  porResp.UpdatedAt.UTC(),
-		TotalReserve: decimal.NewFromFloat(porResp.TotalToken),
-	}
-	return res, nil
-}
-
-func hexToBytes(hexStr string) ([]byte, error) {
-	if len(hexStr) < 2 || hexStr[:2] != "0x" {
-		return nil, fmt.Errorf("invalid hex string: %s", hexStr)
-	}
-	return hex.DecodeString(hexStr[2:])
+	//// 7. 使用 WriteReport 提交交易（推荐方式）
+	//evmClient.
+	//report := &cre.Report{
+	//	Target: contractAddress.Bytes(),
+	//	Data:   calldata,
+	//}
+	//gasConfig := &evm.GasConfig{
+	//	GasLimit: config.GasLimit,
+	//}
+	//txResponse, err := contract.WriteReport(runtime, report, gasConfig).Await()
+	//if err != nil {
+	//	return "", fmt.Errorf("submitResult transaction failed: %w", err)
+	//}
+	//
+	//logger.Info("submitResult succeeded", "txHash", common.BytesToHash(txResponse.TxHash).Hex())
+	return fmt.Sprintf("outcome: %d", outcome), nil
 }

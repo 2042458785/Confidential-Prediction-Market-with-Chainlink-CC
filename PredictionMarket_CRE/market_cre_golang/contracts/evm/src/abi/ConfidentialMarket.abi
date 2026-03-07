@@ -5,6 +5,33 @@
 		"type": "constructor"
 	},
 	{
+		"inputs": [],
+		"name": "ECDSAInvalidSignature",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "length",
+				"type": "uint256"
+			}
+		],
+		"name": "ECDSAInvalidSignatureLength",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes32",
+				"name": "s",
+				"type": "bytes32"
+			}
+		],
+		"name": "ECDSAInvalidSignatureS",
+		"type": "error"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -230,7 +257,7 @@
 		"outputs": [
 			{
 				"internalType": "uint256",
-				"name": "marketId",
+				"name": "return_marketId",
 				"type": "uint256"
 			}
 		],
@@ -416,11 +443,11 @@
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "_addr",
+				"name": "_signer",
 				"type": "address"
 			}
 		],
-		"name": "setTrustedCRE",
+		"name": "setTrustedSigner",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -463,7 +490,7 @@
 	},
 	{
 		"inputs": [],
-		"name": "trustedCREAddress",
+		"name": "trustedSigner",
 		"outputs": [
 			{
 				"internalType": "address",

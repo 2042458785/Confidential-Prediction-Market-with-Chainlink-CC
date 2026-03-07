@@ -35,11 +35,11 @@ contract ConfidentialMarket is MarketData, ReentrancyGuard, Ownable {
         string memory description,
         uint48 closeTime,
         uint48 resolveWindow
-    ) external onlyAdmin returns (uint256 marketId) {
+    ) external onlyAdmin returns (uint256 return_marketId) {
         require(closeTime > block.timestamp, "Close time must be future");
         require(resolveWindow > 0, "Resolve window required");
 
-        marketId = OrderMarketid++;
+        uint256 marketId = OrderMarketid++;
         Market storage market = markets[marketId];
         market.id = marketId;
         market.description = description;
@@ -53,6 +53,7 @@ contract ConfidentialMarket is MarketData, ReentrancyGuard, Ownable {
         market.resolved = false;
 
         emit MarketCreated(marketId, description, closeTime);
+        return marketId;
     }
 
     // 用户下注

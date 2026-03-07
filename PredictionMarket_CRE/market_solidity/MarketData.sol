@@ -27,7 +27,7 @@ contract MarketData {
     }
 
     mapping(uint256 => Market) public markets;
-    uint256 public OrderMarketid;
+    uint256 public OrderMarketid=0;
     mapping(uint256 => uint256) public marketTotalPools; // 市场总下注金额
 
     // 存储 CRE DON 的公钥地址（可以是多个，但通常是一个聚合签名者）

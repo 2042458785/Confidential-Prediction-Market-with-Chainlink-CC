@@ -51,7 +51,7 @@ var (
 )
 
 var ConfidentialMarketMetaData = &bind.MetaData{
-	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"encryptedBet\",\"type\":\"bytes\"}],\"name\":\"BetPlaced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint48\",\"name\":\"closeTime\",\"type\":\"uint48\"}],\"name\":\"MarketCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"outcome\",\"type\":\"uint8\"}],\"name\":\"MarketResolved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"}],\"name\":\"SettlementRequested\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"WinningsClaimed\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"OrderMarketid\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"admins\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"betIndex\",\"type\":\"uint256\"}],\"name\":\"claimWinnings\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"uint48\",\"name\":\"closeTime\",\"type\":\"uint48\"},{\"internalType\":\"uint48\",\"name\":\"resolveWindow\",\"type\":\"uint48\"}],\"name\":\"createMarket\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"marketTotalPools\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"markets\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"enumMarketData.MarketStatus\",\"name\":\"state\",\"type\":\"uint8\"},{\"internalType\":\"uint48\",\"name\":\"createTimeStamp\",\"type\":\"uint48\"},{\"internalType\":\"uint48\",\"name\":\"closeTime\",\"type\":\"uint48\"},{\"internalType\":\"uint48\",\"name\":\"resolveWindow\",\"type\":\"uint48\"},{\"internalType\":\"uint48\",\"name\":\"resolveTimeStamp\",\"type\":\"uint48\"},{\"internalType\":\"uint8\",\"name\":\"outcome\",\"type\":\"uint8\"},{\"internalType\":\"bool\",\"name\":\"resolved\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"encryptedBet\",\"type\":\"bytes\"}],\"name\":\"placeBet\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"}],\"name\":\"requestSettlement\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"},{\"internalType\":\"uint256[]\",\"name\":\"betIndices\",\"type\":\"uint256[]\"},{\"internalType\":\"uint8[]\",\"name\":\"options\",\"type\":\"uint8[]\"},{\"internalType\":\"uint256[]\",\"name\":\"amounts\",\"type\":\"uint256[]\"}],\"name\":\"revealBets\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"admin\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"status\",\"type\":\"bool\"}],\"name\":\"setAdmin\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_addr\",\"type\":\"address\"}],\"name\":\"setTrustedCRE\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"},{\"internalType\":\"uint8\",\"name\":\"outcome\",\"type\":\"uint8\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"submitResult\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"trustedCREAddress\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
+	ABI: "[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"inputs\":[],\"name\":\"ECDSAInvalidSignature\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"length\",\"type\":\"uint256\"}],\"name\":\"ECDSAInvalidSignatureLength\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"bytes32\",\"name\":\"s\",\"type\":\"bytes32\"}],\"name\":\"ECDSAInvalidSignatureS\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"owner\",\"type\":\"address\"}],\"name\":\"OwnableInvalidOwner\",\"type\":\"error\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"account\",\"type\":\"address\"}],\"name\":\"OwnableUnauthorizedAccount\",\"type\":\"error\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"encryptedBet\",\"type\":\"bytes\"}],\"name\":\"BetPlaced\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"indexed\":false,\"internalType\":\"uint48\",\"name\":\"closeTime\",\"type\":\"uint48\"}],\"name\":\"MarketCreated\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint8\",\"name\":\"outcome\",\"type\":\"uint8\"}],\"name\":\"MarketResolved\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"}],\"name\":\"SettlementRequested\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"user\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"}],\"name\":\"WinningsClaimed\",\"type\":\"event\"},{\"inputs\":[],\"name\":\"OrderMarketid\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"name\":\"admins\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"betIndex\",\"type\":\"uint256\"}],\"name\":\"claimWinnings\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"uint48\",\"name\":\"closeTime\",\"type\":\"uint48\"},{\"internalType\":\"uint48\",\"name\":\"resolveWindow\",\"type\":\"uint48\"}],\"name\":\"createMarket\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"return_marketId\",\"type\":\"uint256\"}],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"marketTotalPools\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"name\":\"markets\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"id\",\"type\":\"uint256\"},{\"internalType\":\"string\",\"name\":\"description\",\"type\":\"string\"},{\"internalType\":\"enumMarketData.MarketStatus\",\"name\":\"state\",\"type\":\"uint8\"},{\"internalType\":\"uint48\",\"name\":\"createTimeStamp\",\"type\":\"uint48\"},{\"internalType\":\"uint48\",\"name\":\"closeTime\",\"type\":\"uint48\"},{\"internalType\":\"uint48\",\"name\":\"resolveWindow\",\"type\":\"uint48\"},{\"internalType\":\"uint48\",\"name\":\"resolveTimeStamp\",\"type\":\"uint48\"},{\"internalType\":\"uint8\",\"name\":\"outcome\",\"type\":\"uint8\"},{\"internalType\":\"bool\",\"name\":\"resolved\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"encryptedBet\",\"type\":\"bytes\"}],\"name\":\"placeBet\",\"outputs\":[],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"}],\"name\":\"requestSettlement\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"},{\"internalType\":\"uint256[]\",\"name\":\"betIndices\",\"type\":\"uint256[]\"},{\"internalType\":\"uint8[]\",\"name\":\"options\",\"type\":\"uint8[]\"},{\"internalType\":\"uint256[]\",\"name\":\"amounts\",\"type\":\"uint256[]\"}],\"name\":\"revealBets\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"admin\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"status\",\"type\":\"bool\"}],\"name\":\"setAdmin\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"_signer\",\"type\":\"address\"}],\"name\":\"setTrustedSigner\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"marketId\",\"type\":\"uint256\"},{\"internalType\":\"uint8\",\"name\":\"outcome\",\"type\":\"uint8\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"submitResult\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"trustedSigner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"}]",
 }
 
 // Structs
@@ -101,8 +101,8 @@ type SetAdminInput struct {
 	Status bool
 }
 
-type SetTrustedCREInput struct {
-	Addr common.Address
+type SetTrustedSignerInput struct {
+	Signer common.Address
 }
 
 type SubmitResultInput struct {
@@ -129,6 +129,17 @@ type MarketsOutput struct {
 }
 
 // Errors
+type ECDSAInvalidSignature struct {
+}
+
+type ECDSAInvalidSignatureLength struct {
+	Length *big.Int
+}
+
+type ECDSAInvalidSignatureS struct {
+	S [32]byte
+}
+
 type OwnableInvalidOwner struct {
 	Owner common.Address
 }
@@ -235,11 +246,11 @@ type ConfidentialMarketCodec interface {
 	EncodeRequestSettlementMethodCall(in RequestSettlementInput) ([]byte, error)
 	EncodeRevealBetsMethodCall(in RevealBetsInput) ([]byte, error)
 	EncodeSetAdminMethodCall(in SetAdminInput) ([]byte, error)
-	EncodeSetTrustedCREMethodCall(in SetTrustedCREInput) ([]byte, error)
+	EncodeSetTrustedSignerMethodCall(in SetTrustedSignerInput) ([]byte, error)
 	EncodeSubmitResultMethodCall(in SubmitResultInput) ([]byte, error)
 	EncodeTransferOwnershipMethodCall(in TransferOwnershipInput) ([]byte, error)
-	EncodeTrustedCREAddressMethodCall() ([]byte, error)
-	DecodeTrustedCREAddressMethodOutput(data []byte) (common.Address, error)
+	EncodeTrustedSignerMethodCall() ([]byte, error)
+	DecodeTrustedSignerMethodOutput(data []byte) (common.Address, error)
 	BetPlacedLogHash() []byte
 	EncodeBetPlacedTopics(evt abi.Event, values []BetPlacedTopics) ([]*evm.TopicValues, error)
 	DecodeBetPlaced(log *evm.Log) (*BetPlacedDecoded, error)
@@ -535,8 +546,8 @@ func (c *Codec) EncodeSetAdminMethodCall(in SetAdminInput) ([]byte, error) {
 	return c.abi.Pack("setAdmin", in.Admin, in.Status)
 }
 
-func (c *Codec) EncodeSetTrustedCREMethodCall(in SetTrustedCREInput) ([]byte, error) {
-	return c.abi.Pack("setTrustedCRE", in.Addr)
+func (c *Codec) EncodeSetTrustedSignerMethodCall(in SetTrustedSignerInput) ([]byte, error) {
+	return c.abi.Pack("setTrustedSigner", in.Signer)
 }
 
 func (c *Codec) EncodeSubmitResultMethodCall(in SubmitResultInput) ([]byte, error) {
@@ -547,12 +558,12 @@ func (c *Codec) EncodeTransferOwnershipMethodCall(in TransferOwnershipInput) ([]
 	return c.abi.Pack("transferOwnership", in.NewOwner)
 }
 
-func (c *Codec) EncodeTrustedCREAddressMethodCall() ([]byte, error) {
-	return c.abi.Pack("trustedCREAddress")
+func (c *Codec) EncodeTrustedSignerMethodCall() ([]byte, error) {
+	return c.abi.Pack("trustedSigner")
 }
 
-func (c *Codec) DecodeTrustedCREAddressMethodOutput(data []byte) (common.Address, error) {
-	vals, err := c.abi.Methods["trustedCREAddress"].Outputs.Unpack(data)
+func (c *Codec) DecodeTrustedSignerMethodOutput(data []byte) (common.Address, error) {
+	vals, err := c.abi.Methods["trustedSigner"].Outputs.Unpack(data)
 	if err != nil {
 		return *new(common.Address), err
 	}
@@ -1156,11 +1167,11 @@ func (c ConfidentialMarket) Owner(
 
 }
 
-func (c ConfidentialMarket) TrustedCREAddress(
+func (c ConfidentialMarket) TrustedSigner(
 	runtime cre.Runtime,
 	blockNumber *big.Int,
 ) cre.Promise[common.Address] {
-	calldata, err := c.Codec.EncodeTrustedCREAddressMethodCall()
+	calldata, err := c.Codec.EncodeTrustedSignerMethodCall()
 	if err != nil {
 		return cre.PromiseFromResult[common.Address](*new(common.Address), err)
 	}
@@ -1188,7 +1199,7 @@ func (c ConfidentialMarket) TrustedCREAddress(
 		})
 	})
 	return cre.Then(promise, func(response *evm.CallContractReply) (common.Address, error) {
-		return c.Codec.DecodeTrustedCREAddressMethodOutput(response.Data)
+		return c.Codec.DecodeTrustedSignerMethodOutput(response.Data)
 	})
 
 }
@@ -1203,6 +1214,77 @@ func (c ConfidentialMarket) WriteReport(
 		Report:    report,
 		GasConfig: gasConfig,
 	})
+}
+
+// DecodeECDSAInvalidSignatureError decodes a ECDSAInvalidSignature error from revert data.
+func (c *ConfidentialMarket) DecodeECDSAInvalidSignatureError(data []byte) (*ECDSAInvalidSignature, error) {
+	args := c.ABI.Errors["ECDSAInvalidSignature"].Inputs
+	values, err := args.Unpack(data[4:])
+	if err != nil {
+		return nil, fmt.Errorf("failed to unpack error: %w", err)
+	}
+	if len(values) != 0 {
+		return nil, fmt.Errorf("expected 0 values, got %d", len(values))
+	}
+
+	return &ECDSAInvalidSignature{}, nil
+}
+
+// Error implements the error interface for ECDSAInvalidSignature.
+func (e *ECDSAInvalidSignature) Error() string {
+	return fmt.Sprintf("ECDSAInvalidSignature error:")
+}
+
+// DecodeECDSAInvalidSignatureLengthError decodes a ECDSAInvalidSignatureLength error from revert data.
+func (c *ConfidentialMarket) DecodeECDSAInvalidSignatureLengthError(data []byte) (*ECDSAInvalidSignatureLength, error) {
+	args := c.ABI.Errors["ECDSAInvalidSignatureLength"].Inputs
+	values, err := args.Unpack(data[4:])
+	if err != nil {
+		return nil, fmt.Errorf("failed to unpack error: %w", err)
+	}
+	if len(values) != 1 {
+		return nil, fmt.Errorf("expected 1 values, got %d", len(values))
+	}
+
+	length, ok0 := values[0].(*big.Int)
+	if !ok0 {
+		return nil, fmt.Errorf("unexpected type for length in ECDSAInvalidSignatureLength error")
+	}
+
+	return &ECDSAInvalidSignatureLength{
+		Length: length,
+	}, nil
+}
+
+// Error implements the error interface for ECDSAInvalidSignatureLength.
+func (e *ECDSAInvalidSignatureLength) Error() string {
+	return fmt.Sprintf("ECDSAInvalidSignatureLength error: length=%v;", e.Length)
+}
+
+// DecodeECDSAInvalidSignatureSError decodes a ECDSAInvalidSignatureS error from revert data.
+func (c *ConfidentialMarket) DecodeECDSAInvalidSignatureSError(data []byte) (*ECDSAInvalidSignatureS, error) {
+	args := c.ABI.Errors["ECDSAInvalidSignatureS"].Inputs
+	values, err := args.Unpack(data[4:])
+	if err != nil {
+		return nil, fmt.Errorf("failed to unpack error: %w", err)
+	}
+	if len(values) != 1 {
+		return nil, fmt.Errorf("expected 1 values, got %d", len(values))
+	}
+
+	s, ok0 := values[0].([32]byte)
+	if !ok0 {
+		return nil, fmt.Errorf("unexpected type for s in ECDSAInvalidSignatureS error")
+	}
+
+	return &ECDSAInvalidSignatureS{
+		S: s,
+	}, nil
+}
+
+// Error implements the error interface for ECDSAInvalidSignatureS.
+func (e *ECDSAInvalidSignatureS) Error() string {
+	return fmt.Sprintf("ECDSAInvalidSignatureS error: s=%v;", e.S)
 }
 
 // DecodeOwnableInvalidOwnerError decodes a OwnableInvalidOwner error from revert data.
@@ -1259,6 +1341,12 @@ func (e *OwnableUnauthorizedAccount) Error() string {
 
 func (c *ConfidentialMarket) UnpackError(data []byte) (any, error) {
 	switch common.Bytes2Hex(data[:4]) {
+	case common.Bytes2Hex(c.ABI.Errors["ECDSAInvalidSignature"].ID.Bytes()[:4]):
+		return c.DecodeECDSAInvalidSignatureError(data)
+	case common.Bytes2Hex(c.ABI.Errors["ECDSAInvalidSignatureLength"].ID.Bytes()[:4]):
+		return c.DecodeECDSAInvalidSignatureLengthError(data)
+	case common.Bytes2Hex(c.ABI.Errors["ECDSAInvalidSignatureS"].ID.Bytes()[:4]):
+		return c.DecodeECDSAInvalidSignatureSError(data)
 	case common.Bytes2Hex(c.ABI.Errors["OwnableInvalidOwner"].ID.Bytes()[:4]):
 		return c.DecodeOwnableInvalidOwnerError(data)
 	case common.Bytes2Hex(c.ABI.Errors["OwnableUnauthorizedAccount"].ID.Bytes()[:4]):

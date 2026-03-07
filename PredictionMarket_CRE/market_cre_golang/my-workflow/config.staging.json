@@ -1,14 +1,16 @@
 {
-  "schedule": "*/30 * * * * *",
-  "url": "https://api.real-time-reserves.verinumus.io/v1/chainlink/proof-of-reserves/TrueUSD",
-  "evms": [
-    {
-      "tokenAddress": "0x4700A50d858Cb281847ca4Ee0938F80DEfB3F1dd",
-      "reserveManagerAddress": "0x51933aD3A79c770cb6800585325649494120401a",
-      "balanceReaderAddress": "0x4b0739c94C1389B55481cb7506c62430cA7211Cf",
-      "messageEmitterAddress": "0x1d598672486ecB50685Da5497390571Ac4E93FDc",
-      "chainName": "ethereum-testnet-sepolia",
-      "gasLimit": 1000000
+  "networks": {
+    "ethereum-sepolia": {
+      "rpcUrl": "https://go.getblock.io/d1e393cfe07f47fcbeab295d4e022d3d",
+      "chainId": 11155111
     }
-  ]
+  },
+  "contractAddress": "0x55eCFa861042bF2e5Ba9D1BDbF4C07D3C253B4a9",
+  "chainSelector": 16015286601757825753,
+  "apiConfig": {
+    "url": "https://api.open-meteo.com/v1/forecast",
+    "method": "GET",
+    "headers": {}
+  },
+  "gasLimit": 500000
 }

@@ -22,12 +22,12 @@ var (
 
 // ConfidentialMarketMock is a mock implementation of ConfidentialMarket for testing.
 type ConfidentialMarketMock struct {
-	OrderMarketid     func() (*big.Int, error)
-	Admins            func(AdminsInput) (bool, error)
-	MarketTotalPools  func(MarketTotalPoolsInput) (*big.Int, error)
-	Markets           func(MarketsInput) (MarketsOutput, error)
-	Owner             func() (common.Address, error)
-	TrustedCREAddress func() (common.Address, error)
+	OrderMarketid    func() (*big.Int, error)
+	Admins           func(AdminsInput) (bool, error)
+	MarketTotalPools func(MarketTotalPoolsInput) (*big.Int, error)
+	Markets          func(MarketsInput) (MarketsOutput, error)
+	Owner            func() (common.Address, error)
+	TrustedSigner    func() (common.Address, error)
 }
 
 // NewConfidentialMarketMock creates a new ConfidentialMarketMock for testing.
@@ -145,15 +145,15 @@ func NewConfidentialMarketMock(address common.Address, clientMock *evmmock.Clien
 			}
 			return abi.Methods["owner"].Outputs.Pack(result)
 		},
-		string(abi.Methods["trustedCREAddress"].ID[:4]): func(payload []byte) ([]byte, error) {
-			if mock.TrustedCREAddress == nil {
-				return nil, errors.New("trustedCREAddress method not mocked")
+		string(abi.Methods["trustedSigner"].ID[:4]): func(payload []byte) ([]byte, error) {
+			if mock.TrustedSigner == nil {
+				return nil, errors.New("trustedSigner method not mocked")
 			}
-			result, err := mock.TrustedCREAddress()
+			result, err := mock.TrustedSigner()
 			if err != nil {
 				return nil, err
 			}
-			return abi.Methods["trustedCREAddress"].Outputs.Pack(result)
+			return abi.Methods["trustedSigner"].Outputs.Pack(result)
 		},
 	}
 
