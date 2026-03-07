@@ -12,7 +12,7 @@ import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/Confir
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";// 重入锁保护，用于资金提取等敏感操作
 import "@openzeppelin/contracts/utils/Strings.sol"; // 将 uint256 转换为字符串（用于构建 Functions 参数）
 
-import { MarketData } from "Prediction-Market/MarketData.sol";
+import { MarketData } from "./MarketData.sol";
 
 contract ConfidentialMarket is 
 FunctionsClient,AutomationCompatibleInterface,ConfirmedOwner,ReentrancyGuard,MarketData{
