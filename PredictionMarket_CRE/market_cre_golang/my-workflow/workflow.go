@@ -201,7 +201,7 @@ func onSettlementRequested(
 	if err != nil {
 		return "", fmt.Errorf("failed to create codec: %w", err)
 	}
-	calldata, err := codec.EncodeSubmitResultMethodCall(confidential_market.SubmitResultInput{
+	callData, err := codec.EncodeSubmitResultMethodCall(confidential_market.SubmitResultInput{
 		MarketId:  marketId,
 		Outcome:   outcome,
 		Signature: []byte{}, // 合约不验证签名，传空即可
@@ -210,23 +210,36 @@ func onSettlementRequested(
 		return "", fmt.Errorf("failed to encode calldata: %w", err)
 	}
 
-	logger.Info("calldata", calldata)
-	logger.Info("Successful to Transaction")
+	// 7. 通过 EVM 客户端直接发送交易
+	// 从 runtime 获取 EVM 客户端（方法名可能略有不同，根据你的 SDK 版本调整）
+	reportReq := &cre.ReportRequest{
+		EncodedPayload: callData,
+		EncoderName:    "evm",
+		SigningAlgo:    "evm",
+		HashingAlgo:    "keccak256",
+	}
 
-	//// 7. 使用 WriteReport 提交交易（推荐方式）
-	//evmClient.
-	//report := &cre.Report{
-	//	Target: contractAddress.Bytes(),
-	//	Data:   calldata,
-	//}
-	//gasConfig := &evm.GasConfig{
-	//	GasLimit: config.GasLimit,
-	//}
-	//txResponse, err := contract.WriteReport(runtime, report, gasConfig).Await()
-	//if err != nil {
-	//	return "", fmt.Errorf("submitResult transaction failed: %w", err)
-	//}
-	//
-	//logger.Info("submitResult succeeded", "txHash", common.BytesToHash(txResponse.TxHash).Hex())
+	reportPromise := runtime.GenerateReport(reportReq)
+	report, err := reportPromise.Await()
+	if err != nil {
+		logger.Error("GenerateReport failed", "error", err)
+		return "", fmt.Errorf("GenerateReport failed: %w", err)
+	}
+
+	// 设置 gas 配置
+	gasConfig := &evm.GasConfig{
+		GasLimit: config.GasLimit,
+	}
+
+	// 发送交易
+	txResponse, err := contract.WriteReport(runtime, report, gasConfig).Await()
+	if err != nil {
+		logger.Error("WriteReport failed", "error", err)
+		return "", fmt.Errorf("WriteReport failed: %w", err)
+	}
+
+	txHash := common.BytesToHash(txResponse.TxHash).Hex()
+	logger.Info("submitResult succeeded", "txHash", txHash)
+
 	return fmt.Sprintf("outcome: %d", outcome), nil
 }
