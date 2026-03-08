@@ -137,6 +137,24 @@ contract ConfidentialMarket is MarketData, ReentrancyGuard, Ownable {
         }
     }
 
+    // 视图函数：获取下注总数
+    function getBetsCount(uint256 marketId) external view returns (uint256) {
+        return markets[marketId].bets.length;
+    }
+
+    // 视图函数：获取单个下注
+    function getBet(uint256 marketId, uint256 index) external view returns (
+        address user,
+        bytes memory encryptedBet,
+        uint256 amount,
+        uint8 option,
+        bool claimed
+    ) {
+        require(index < markets[marketId].bets.length, "Index out of bounds");
+        Bet storage bet = markets[marketId].bets[index];
+        return (bet.user, bet.encryptedBet, bet.amount, bet.option, bet.claimed);
+    }
+
     // 用户领取奖励
     function claimWinnings(uint256 marketId, uint256 betIndex) external nonReentrant {
         Market storage market = markets[marketId];

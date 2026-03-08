@@ -184,7 +184,7 @@ func onSettlementRequested(
 			return outcomeWrapper{}, fmt.Errorf("failed to parse weather response: %w", err)
 		}
 
-		// 根据温度决定 outcome（示例：温度 > 15℃ 为 1，否则为 0）
+		// 根据温度决定 outcome（示例：温度 > 5℃ 为 1，否则为 0）
 		if weatherData.CurrentWeather.Temperature > 5 {
 			return outcomeWrapper{Value: 1}, nil
 		}
@@ -211,7 +211,7 @@ func onSettlementRequested(
 	}
 
 	// 7. 通过 EVM 客户端直接发送交易
-	// 从 runtime 获取 EVM 客户端（方法名可能略有不同，根据你的 SDK 版本调整）
+	// 从 runtime 获取 EVM 客户端
 	reportReq := &cre.ReportRequest{
 		EncodedPayload: callData,
 		EncoderName:    "evm",
