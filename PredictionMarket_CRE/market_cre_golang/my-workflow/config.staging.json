@@ -5,7 +5,7 @@
       "chainId": 11155111
     }
   },
-  "contractAddress": "0x55eCFa861042bF2e5Ba9D1BDbF4C07D3C253B4a9",
+  "contractAddress": "0xCb6111f3A4A4A5c0B6b2D02BEbBC98dE344A2216",
   "chainSelector": 16015286601757825753,
   "apiConfig": {
     "url": "https://api.open-meteo.com/v1/forecast",

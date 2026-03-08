@@ -85,25 +85,24 @@ func onSettlementRequested(
 	marketId := payload.Data.MarketId
 	logger.Info("Received SettlementRequested", "marketId", marketId)
 
-	fmt.Println("对应的市场id", marketId)
-
 	// 2. 从链上读取市场描述
 	args := confidential_market.MarketsInput{
 		Arg0: marketId,
 	}
-	fmt.Println("对应的市场id", marketId)
 
-	// 指定区块号为 finalized (-3)
+	// 官方推荐：使用 finalized 区块 (-3)
 	blockNumber := big.NewInt(-3)
 	marketsPromise := contract.Markets(runtime, args, blockNumber)
 
 	marketsOutput, err := marketsPromise.Await()
 	if err != nil {
-		return "", fmt.Errorf("failed to get market data from chain: %w", err)
+		// 增加更详细的错误日志
+		logger.Error("Failed to get market data from chain", "error", err, "marketId", marketId)
+		return "", fmt.Errorf("failed to get market data from chain (market %s): %w", marketId.String(), err)
 	}
 
-	fmt.Println("对应的市场id", marketId)
 	description := marketsOutput.Description
+
 	logger.Info("Market description from chain", "description", description)
 
 	//description := "2025-03-08:London" // 硬编码，便于模拟
