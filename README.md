@@ -153,3 +153,117 @@ Open‑Meteo for free weather & geocoding APIs.
 OpenZeppelin for secure contract libraries.
 
 Built with ❤️ for the Chainlink Hackathon Spring 2026
+
+# Prediction Market Frontend
+
+A prediction market frontend application in Polymarket style.
+
+## Features
+
+- 🎨 Modern UI design, similar to Polymarket
+- 📊 Market list display
+- 💰 Market details and betting functionality
+- 🔗 MetaMask wallet connection
+- 📱 Responsive design, mobile friendly
+
+## Tech Stack
+
+- Vue 3 + TypeScript
+- Vite
+- Ethers.js v6
+- CSS3
+
+## Installation and Running
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+## Configuration
+
+Before using, modify the following configurations:
+
+### 1. Contract Address
+
+Modify in `src/App.vue`:
+
+```typescript
+const CONTRACT_ADDRESS = '0xYourContractAddress'
+```
+
+### 2. RPC Provider
+
+Modify in the `loadMarkets` function in `src/App.vue`:
+
+```typescript
+const provider = new ethers.JsonRpcProvider('https://sepolia.infura.io/v3/YOUR_INFURA_KEY')
+```
+
+You can use:
+- Infura: https://infura.io/
+- Alchemy: https://www.alchemy.com/
+- or other RPC providers
+
+## Project Structure
+
+```
+src/
+├── App.vue                    # Main application component with wallet connection
+├── main.ts                    # Application entry
+├── types.ts                   # TypeScript type definitions
+├── style.css                  # Global styles
+└── components/
+    ├── MarketList.vue         # Market list with refresh functionality
+    ├── MarketCard.vue         # Individual market card display
+    ├── MarketDetail.vue       # Market details, betting, and settlement requests
+    ├── ClaimWinnings.vue      # Winnings claim interface for resolved markets
+    ├── DecodeTools.vue        # Utility to decode encrypted bet data
+    ├── AdminRevealBets.vue    # Admin tool to batch decrypt and reveal bets
+    ├── AdminSubmitResult.vue  # Admin panel for trusted signer setup and result submission
+    └── TestSubmitResult.vue   # Testing tool for submitResult functionality
+```
+
+### Component Details
+
+**App.vue** - Main application container that manages wallet connection (MetaMask), view routing between market list and detail views, and market data loading from the smart contract.
+
+**MarketList.vue** - Displays all available markets in a grid layout with refresh functionality. Includes embedded admin tools (DecodeTools, AdminRevealBets, AdminSubmitResult) for market management.
+
+**MarketCard.vue** - Individual market card showing market ID, status badge (Open/Closed/Resolving/Resolved), description, total pool, bet count, and close time. Clickable to view details.
+
+**MarketDetail.vue** - Comprehensive market view with betting interface (option selection, amount input), settlement request button for closed markets, and integrated ClaimWinnings component for resolved markets.
+
+**ClaimWinnings.vue** - Displays user's bets for a resolved market with win/loss status, estimated rewards, and claim buttons. Automatically loads user bets and handles the claimWinnings transaction.
+
+**DecodeTools.vue** - Developer utility to manually decode encrypted bet data (encryptedBet bytes) into readable option and amount values using ABI decoding.
+
+**AdminRevealBets.vue** - Admin interface to load all bets for a market, decode them locally, and batch submit revealed data to the contract via revealBets() function. Required before users can claim winnings.
+
+**AdminSubmitResult.vue** - Admin panel with two functions: (1) Set trusted signer address for result submission authorization, (2) Manually submit market results with signature verification. Includes auto-discovery of markets in "Resolving" state.
+
+**TestSubmitResult.vue** - Testing interface for submitResult functionality. Shows current configuration (contract address, trusted signer, wallet match status), allows manual result submission with signature generation, and displays detailed signing process steps.
+
+## Usage Instructions
+
+1. Click the "Connect Wallet" button in the top right corner to connect MetaMask
+2. Browse the market list to view all available prediction markets
+3. Click on a market card to enter the detail page
+4. Select betting option (Yes/No)
+5. Enter bet amount
+6. Click "Confirm Bet" to submit the transaction
+
+## Notes
+
+- Ensure MetaMask browser extension is installed
+- Ensure your wallet is connected to the correct network (Sepolia testnet)
+- Ensure your wallet has sufficient ETH for betting and gas fees
+- The current version's encrypted betting data is a simplified implementation; for production environments, real encryption logic should be implemented
+
+Live URL: https://market-vue-nine.vercel.app/
