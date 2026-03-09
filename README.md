@@ -9,6 +9,8 @@ A private, automated prediction market built with Chainlink Runtime Environment 
 
 🏆 Built for the Chainlink Hackathon
 
+Youtube: https://www.youtube.com/watch?v=YuDRxk5sFs8
+
 ✨ Key Features
 
 🔐 Privacy by Design – Bets are encrypted on‑chain using a temporary AES key; actual choices stay hidden until market resolution.
